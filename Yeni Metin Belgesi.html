@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Aşk Business Tour | Emre & Dilara</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Sacramento&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <style>
+        body { font-family: 'Poppins', sans-serif; user-select: none; }
+        .romantic-font { font-family: 'Sacramento', cursive; }
+        .glass { background: rgba(15, 15, 25, 0.95); backdrop-filter: blur(18px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .cell { transition: all 0.2s ease; }
+        @keyframes bigDiceRoll {
+            0% { transform: scale(0.5) rotate(0deg); opacity: 0; }
+            50% { transform: scale(1.2) rotate(180deg); opacity: 1; }
+            100% { transform: scale(1) rotate(360deg); opacity: 1; }
+        }
+        .big-rolling { animation: bigDiceRoll 0.6s ease-in-out; }
+        @keyframes hop {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-10px) scale(1.15); }
+        }
+        .hopping { animation: hop 0.3s ease-in-out; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-950 via-rose-950 to-indigo-950 min-h-screen text-gray-100 flex flex-col justify-between overflow-x-hidden">
+
+    <!-- KİLİT EKRANI -->
+    <div id="lockScreen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-2xl p-4">
+        <div class="glass p-8 rounded-3xl shadow-2xl max-w-md w-full text-center border border-rose-500/30">
+            <div class="w-20 h-20 bg-rose-500/20 rounded-full flex items-center justify-center mx-auto mb-6 text-rose-400 text-3xl shadow-inner">
+                <i class="fa-solid fa-heart-pulse animate-pulse"></i>
+            </div>
+            <h2 class="text-3xl font-bold mb-2 text-rose-300">Aşk Business Tour</h2>
+            <p class="text-gray-400 text-sm mb-6">Haritayı açmak için şifreyi gir kiral (Örn: 1910)</p>
+            <input type="password" id="passcode" placeholder="Şifre..." class="w-full px-4 py-3 bg-gray-900 border border-rose-500/30 rounded-xl text-center text-xl tracking-widest text-rose-200 focus:outline-none focus:border-rose-500 mb-4">
+            <button onclick="checkPass()" class="w-full py-3 bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white font-semibold rounded-xl shadow-lg shadow-rose-600/35 transition active:scale-95">
+                Tur Başlasın <i class="fa-solid fa-dice ml-2"></i>
+            </button>
+            <p id="errorMsg" class="text-rose-400 text-xs mt-3 hidden">Şifre yanlış kiral, tekrar dene!</p>
+        </div>
+    </div>
+
+    <!-- ANA OYUN ARAYÜZÜ -->
+    <div id="mainContent" class="hidden flex-grow flex flex-col justify-between">
+        
+        <!-- HEADER & OYUNCU BAKİYELERİ -->
+        <header class="glass sticky top-0 z-40 px-3 py-2 border-b border-white/10 flex flex-col gap-1.5">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-dice text-rose-500 text-lg animate-spin"></i>
+                    <span class="font-bold text-xs md:text-sm tracking-wide text-rose-300">Aşk Business Tour (Zamlı Mülk Çalma)</span>
+                </div>
+                <div class="text-[10px] bg-rose-500/25 border border-rose-500/30 px-2.5 py-0.5 rounded-full text-rose-300 font-semibold" id="topTimer">
+                    Birlikteyiz ❤️
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-2 text-center text-xs">
+                <div class="bg-blue-950/60 border border-blue-500/30 rounded-xl p-1 flex justify-around items-center">
+                    <span class="font-bold text-blue-300 text-[11px]">Emre 👦🏻</span>
+                    <span id="p1Money" class="font-mono text-emerald-400 font-bold text-xs">2000 ₺</span>
+                </div>
+                <div class="bg-pink-950/60 border border-pink-500/30 rounded-xl p-1 flex justify-around items-center">
+                    <span class="font-bold text-pink-300 text-[11px]">Dilara 👧🏻</span>
+                    <span id="p2Money" class="font-mono text-emerald-400 font-bold text-xs">2000 ₺</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- 8x8 DEV OYUN ALANI -->
+        <main class="max-w-4xl w-full mx-auto p-1.5 flex-grow flex flex-col justify-center space-y-2">
+            
+            <div class="glass p-2 rounded-2xl border border-rose-500/20 shadow-2xl overflow-x-auto">
+                <div class="grid grid-cols-8 gap-1 text-center min-w-[600px]" id="monopolyBoard">
+                    <!-- JS ile dinamik doldurulacak -->
+                </div>
+            </div>
+
+            <!-- KONTROL & ZAR PANELİ -->
+            <div class="glass p-3 rounded-2xl border border-rose-500/20 flex flex-col items-center justify-between gap-2 text-center">
+                <div>
+                    <span id="turnIndicator" class="text-[11px] font-bold uppercase px-3 py-0.5 rounded-full bg-blue-600 text-white inline-block mb-0.5 shadow">Emre'nin Sırası 👦🏻</span>
+                    <h3 id="statusText" class="text-xs md:text-sm font-semibold text-rose-200">Zarı at, mülkleri çal veya renk setini tamamla kiral!</h3>
+                </div>
+                
+                <div id="actionButtons" class="flex gap-2 w-full max-w-xs">
+                    <button id="rollBtn" onclick="rollDice()" class="flex-grow py-2.5 bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white font-bold rounded-xl shadow-lg shadow-rose-600/30 transition transform active:scale-95 flex items-center justify-center gap-2 text-xs">
+                        <i class="fa-solid fa-dice text-base" id="diceIcon"></i> Çift Zar At
+                    </button>
+                    <button id="buyBtn" onclick="buyProperty()" class="hidden px-3 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-lg transition active:scale-95 text-xs">
+                        Satın Al / Çal (<span id="buyCost">200</span>₺)
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <!-- EKRAN ORTASI DEV ZAR MODALI -->
+        <div id="diceModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+            <div class="glass p-8 rounded-3xl border border-rose-500/50 text-center space-y-6 shadow-2xl max-w-xs w-full">
+                <h3 class="text-lg font-bold text-rose-300">Zarlar Atılıyor...</h3>
+                <div class="flex justify-center gap-4 text-6xl text-rose-200">
+                    <div id="modalDice1" class="w-20 h-20 bg-gray-900 border-2 border-rose-500 rounded-2xl flex items-center justify-center shadow-inner big-rolling">⚀</div>
+                    <div id="modalDice2" class="w-20 h-20 bg-gray-900 border-2 border-rose-500 rounded-2xl flex items-center justify-center shadow-inner big-rolling">⚀</div>
+                </div>
+                <p id="modalDiceResult" class="text-sm font-semibold text-gray-300">Şansınız dönüyor...</p>
+            </div>
+        </div>
+
+        <!-- FESTİVAL SEÇİM MODALI -->
+        <div id="festivalModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-4">
+            <div class="glass max-w-md w-full p-5 rounded-3xl border border-rose-500/40 text-center space-y-3 relative animate-scale-up">
+                <h3 class="text-xl font-bold text-rose-300"><i class="fa-solid fa-champagne-glasses mr-2"></i>Festival Zamanı!</h3>
+                <p class="text-xs text-gray-300">Kirasını 5x (veya tekrar seçersen 10x) katına çıkaracağın mülkü seç kiral:</p>
+                <div id="festivalOptions" class="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto p-1"></div>
+            </div>
+        </div>
+
+        <!-- SEYAHAT MODALI -->
+        <div id="travelModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-4">
+            <div class="glass max-w-md w-full p-5 rounded-3xl border border-rose-500/40 text-center space-y-3 relative animate-scale-up">
+                <h3 class="text-xl font-bold text-rose-300"><i class="fa-solid fa-plane-departure mr-2"></i>Seyahat Noktası!</h3>
+                <p class="text-xs text-gray-300">Bu tur burada kaldın kiral. Sonraki tur gitmek istediğin mülkü seç:</p>
+                <div id="travelOptions" class="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto p-1"></div>
+            </div>
+        </div>
+
+        <!-- ANI & MÜLK MODALI -->
+        <div id="memoryModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-4">
+            <div class="glass max-w-md w-full p-5 rounded-3xl border border-rose-500/40 text-center space-y-3 relative animate-scale-up">
+                <button onclick="closeModal()" class="absolute top-3 right-3 text-gray-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
+                <span id="modalPlayer" class="text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full bg-rose-500 text-white">Özel Alan</span>
+                <h3 id="modalTitle" class="text-xl font-bold text-rose-300">Afife Kafe</h3>
+                <div class="h-36 bg-gray-900 rounded-xl border border-rose-500/30 flex items-center justify-center overflow-hidden relative shadow-inner">
+                    <div id="modalImagePlaceholder" class="text-rose-400 flex flex-col items-center gap-1.5">
+                        <i class="fa-solid fa-camera-retro text-2xl animate-bounce"></i>
+                        <span class="text-[10px] text-gray-400">Bu noktada çekildiğimiz anı</span>
+                    </div>
+                </div>
+                <p id="modalDesc" class="text-xs text-gray-300">Burada harika anlar biriktirmiştik.</p>
+                <button onclick="closeModal()" class="w-full py-2.5 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl transition shadow-lg text-xs">
+                    Devam Et <i class="fa-solid fa-arrow-right ml-1"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- OYUN BİTTİ MODALI -->
+        <div id="gameOverModal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl hidden flex items-center justify-center p-4">
+            <div class="glass max-w-md w-full p-6 rounded-3xl border border-rose-500 text-center space-y-4">
+                <div class="w-16 h-16 bg-rose-500/20 rounded-full flex items-center justify-center mx-auto text-rose-400 text-3xl">
+                    <i class="fa-solid fa-crown"></i>
+                </div>
+                <h2 id="winnerTitle" class="text-2xl font-bold text-rose-300">Turun Kazananı!</h2>
+                <p id="winnerDesc" class="text-xs text-gray-300">Mutlak hakim ilan edildiniz!</p>
+                <button onclick="location.reload()" class="w-full py-3 bg-gradient-to-r from-rose-600 to-pink-600 text-white font-bold rounded-xl shadow-lg">
+                    Yeniden Başla <i class="fa-solid fa-rotate-right ml-1"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <footer class="text-center py-2 text-[10px] text-gray-400 glass border-t border-white/5">
+            <p>Emre & Dilara Aşk Business Tour 🤍 19 Ekim</p>
+        </footer>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script>
+        function checkPass() {
+            const pass = document.getElementById('passcode').value;
+            if (pass === '1910' || pass === '1919' || pass === '19102019') {
+                document.getElementById('lockScreen').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('lockScreen').style.display = 'none';
+                    document.getElementById('mainContent').classList.remove('hidden');
+                }, 400);
+            } else {
+                const err = document.getElementById('errorMsg');
+                err.classList.remove('hidden');
+                setTimeout(() => err.classList.add('hidden'), 2500);
+            }
+        }
+
+        // Sayaç
+        const startDate = new Date('2019-10-19T00:00:00');
+        function updateTimer() {
+            const diff = new Date() - startDate;
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            document.getElementById('topTimer').innerText = `Birlikte: ${days} Gün ❤`;
+        }
+        setInterval(updateTimer, 1000);
+        updateTimer();
+
+        // Harita
+        const board = [
+            { id: 0, name: "Başlangıç", type: "start", price: 0, baseRent: 0, rent: 0, owner: null, desc: "Her tur başı 300₺ maaş alırsın!" },
+            { id: 1, name: "Lise Yılları", type: "property", price: 140, baseRent: 20, rent: 20, owner: null, desc: "Tanıştığımız o efsane lise dönemi." },
+            { id: 2, name: "Bandırma Sahil", type: "property", price: 180, baseRent: 25, rent: 25, owner: null, desc: "Dalga sesleri eşliğinde uzun sahil yürüyüşleri." },
+            { id: 3, name: "Araba & Kahve Keyfi", type: "property", price: 200, baseRent: 30, rent: 30, owner: null, desc: "Kahveleri alıp arabada müzik dinleyerek takıldığımız anlar." },
+            { id: 4, name: "Sürpriz Kutu", type: "chance", price: 0, baseRent: 0, rent: 0, owner: null, desc: "Sürpriz şans veya masraf kartı!" },
+            { id: 5, name: "Afife Kafe", type: "property", price: 260, baseRent: 50, rent: 50, owner: null, desc: "En koyu sohbetlerin ve kahkahaların döndüğü mekanımız!" },
+            { id: 6, name: "Diyetisyen Staj Ziyareti", type: "property", price: 280, baseRent: 55, rent: 55, owner: null, desc: "Uzman diyetisyenimizi staj yerinde ziyaret ettiğimiz an!" },
+            { id: 7, name: "Kısıt (Hapishane)", type: "jail", price: 0, baseRent: 0, rent: 0, owner: null, desc: "Aranızdaki tatlı kısıt! 1 tur bekleyip ev izni alırsın." },
+            { id: 8, name: "BANÜ", type: "property", price: 240, baseRent: 40, rent: 40, owner: null, desc: "Bandırma Onyedi Eylül Üniversitesi." },
+            { id: 9, name: "Mr. Sweet", type: "property", price: 240, baseRent: 45, rent: 45, owner: null, desc: "Bilecik'in tatlı buluşma durağı." },
+            { id: 10, name: "Pelitözü Göleti", type: "property", price: 250, baseRent: 45, rent: 45, owner: null, desc: "Gölet kenarı huzurlu piknikler." },
+            { id: 11, name: "İlk Buluşma Parkı", type: "property", price: 190, baseRent: 30, rent: 30, owner: null, desc: "İlk bank anısı." },
+            { id: 12, name: "FaceTime Geceleri", type: "property", price: 200, baseRent: 35, rent: 35, owner: null, desc: "Uzun mesafeli görüntülü aramalar." },
+            { id: 13, name: "Burger King", type: "property", price: 270, baseRent: 55, rent: 55, owner: null, desc: "Favori fast-food durağımız!" },
+            { id: 14, name: "Seyahat Noktası", type: "travel", price: 0, baseRent: 0, rent: 0, owner: null, desc: "Bu tur burada kaldın! Sonraki tur istediğin mülke uç." },
+            { id: 15, name: "Bandırma Tren Garı", type: "property", price: 210, baseRent: 35, rent: 35, owner: null, desc: "Nostaljik tren garı anısı." },
+            { id: 16, name: "The Light Lounge", type: "property", price: 260, baseRent: 50, rent: 50, owner: null, desc: "Kahve ve ortam durağı." },
+            { id: 17, name: "Bilecik Sokakları", type: "property", price: 230, baseRent: 40, rent: 40, owner: null, desc: "Ayaklarımız şişene kadar gezmeler." },
+            { id: 18, name: "Ortak Şarkı Noktası", type: "property", price: 210, baseRent: 35, rent: 35, owner: null, desc: "Arabada hep son ses dinlenen şarkı." },
+            { id: 19, name: "Limon Parkı", type: "property", price: 230, baseRent: 40, rent: 40, owner: null, desc: "Yeşillikler içinde huzur parkı." },
+            { id: 20, name: "Bandırma Merkez", type: "property", price: 230, baseRent: 40, rent: 40, owner: null, desc: "Merkez sokaklarında buluşmalar." },
+            { id: 21, name: "Direkt Hapse Git", type: "goto-jail", price: 0, baseRent: 0, rent: 0, owner: null, desc: "Eyvah! Yakalandın, direkt 7 numaralı hapse yollandın!" },
+            { id: 22, name: "İlk Tatil Durağı", type: "property", price: 350, baseRent: 75, rent: 75, owner: null, desc: "Şehir dışı kaçamağımız." },
+            { id: 23, name: "İKÇÜ", type: "property", price: 300, baseRent: 60, rent: 60, owner: null, desc: "İzmir Katip Çelebi Üniversitesi yılları." },
+            { id: 24, name: "Festival Durağı", type: "festival", price: 0, baseRent: 0, rent: 0, owner: null, desc: "Festival Var! Seçtiğin bir mülkün kirasını katla!" },
+            { id: 25, name: "Evin Önü 5 Dk Kaçamağı", type: "property", price: 220, baseRent: 40, rent: 40, owner: null, desc: "Ayrılmadan önce evin önünde yapılan o tatlı kısa kaçamak!" },
+            { id: 26, name: "Kahve Molası", type: "property", price: 210, baseRent: 35, rent: 35, owner: null, desc: "Günün yorgunluk kahvesi." },
+            { id: 27, name: "Sonsuzluk Çemberi", type: "start", price: 0, baseRent: 0, rent: 0, owner: null, desc: "Birlikte yazılan sonsuz anılar." }
+        ];
+
+        const chanceCards = [
+            { title: "Bursa Otogarı Valiz Bonusu", desc: "Yabancı biri 5 dakikalığına valizini bıraktı, sevap kazandın!", money: 250 },
+            { title: "Burger King (Chicken Royale)", desc: "Sürekli gidip Chicken Royale gömdünüz, hesap size kaldı!", money: -150 },
+            { title: "Maç Deplasmanı", desc: "Harmandalıgücü Spor maçını izlemeye geldin, yol masrafı çıktı!", money: -120 },
+            { title: "Çeyiz Alışverişi", desc: "Çeyiz malzemesi eklendi, bütçe biraz sarsıldı kiral!", money: -250 },
+            { title: "Sokak Kedilerine Mama", desc: "Sokaktaki kedilere mama aldın, cüzdan hafifledi ama sevap büyük!", money: -80 },
+            { title: "KPSS / ALES Başvurusu", desc: "Yine sınav dönemi! ÖSYM'ye başvuru ücreti kaptırdın.", money: -200 },
+            { title: "TÜİK Enflasyon Düzeltmesi", desc: "Maliye ve enflasyon vergisi kapıyı çaldı!", money: -180 },
+            { title: "Şanslı Gün", desc: "Yolda yürürken yerde para buldun veya sürpriz harçlık yattı!", money: 200 }
+        ];
+
+        let player1 = { name: "Emre 👦🏻", pos: 0, money: 2000, jailTurns: 0, skipNextTurn: false, consecutiveDoubles: 0 };
+        let player2 = { name: "Dilara 👧🏻", pos: 0, money: 2000, jailTurns: 0, skipNextTurn: false, consecutiveDoubles: 0 };
+        let turn = 1;
+        let pendingProperty = null;
+        let activeFestivalPropId = null;
+        let isAnimating = false;
+
+        function renderBoard() {
+            const grid = document.getElementById('monopolyBoard');
+            grid.innerHTML = '';
+            
+            const boardSize = 8;
+            for (let r = 0; r < boardSize; r++) {
+                for (let c = 0; c < boardSize; c++) {
+                    let cellIndex = null;
+                    if (r === 0) cellIndex = c;
+                    else if (c === boardSize - 1 && r > 0) cellIndex = 7 + r;
+                    else if (r === boardSize - 1 && c < boardSize - 1) cellIndex = 14 + (boardSize - 1 - c);
+                    else if (c === 0 && r > 0 && r < boardSize - 1) cellIndex = 28 - r;
+
+                    if (cellIndex !== null && cellIndex < board.length) {
+                        const cell = board[cellIndex];
+                        const isP1 = player1.pos === cellIndex;
+                        const isP2 = player2.pos === cellIndex;
+                        
+                        let ownerBadge = '';
+                        if (cell.owner === 1) ownerBadge = '<span class="text-[6px] bg-blue-600 text-white px-0.5 rounded">Emre</span>';
+                        if (cell.owner === 2) ownerBadge = '<span class="text-[6px] bg-pink-600 text-white px-0.5 rounded">Dilara</span>';
+
+                        let festivalBadge = cell.id === activeFestivalPropId ? '<span class="text-[6px] bg-amber-500 text-black font-bold px-0.5 rounded animate-pulse">🔥 (' + (cell.rent === cell.baseRent * 10 ? '10x' : '5x') + ')</span>' : '';
+
+                        // Mülk başkasındaysa çalma fiyatını (%50 zamlı) hesapla
+                        let displayPrice = cell.price;
+                        if(cell.owner !== null && cell.owner !== turn) {
+                            displayPrice = Math.round(cell.price * 1.5);
+                        }
+
+                        grid.innerHTML += `
+                            <div class="cell glass p-1 rounded-lg border ${isP1 || isP2 ? 'border-rose-500 bg-rose-500/20 shadow-md scale-105 hopping' : 'border-red-500/30'} flex flex-col justify-between h-16 text-left relative overflow-hidden">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-[6px] text-gray-400 font-bold">#${cellIndex}</span>
+                                    <div class="flex gap-1">${festivalBadge} ${ownerBadge}</div>
+                                </div>
+                                <div>
+                                    <h4 class="text-[7px] font-bold text-rose-300 leading-tight truncate">${cell.name}</h4>
+                                    <p class="text-[6px] text-emerald-400 font-mono">${cell.price ? displayPrice + '₺' : ''}</p>
+                                </div>
+                                <div class="flex gap-0.5">
+                                    ${isP1 ? '<span class="text-[6px] bg-blue-600 text-white px-1 rounded-full font-bold animate-bounce">Emre</span>' : ''}
+                                    ${isP2 ? '<span class="text-[6px] bg-pink-600 text-white px-1 rounded-full font-bold animate-bounce">Dilara</span>' : ''}
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        if (r === 3 && c === 3) {
+                            grid.innerHTML += `
+                                <div class="col-span-2 row-span-2 glass p-2 rounded-xl flex flex-col items-center justify-center border border-rose-500/30 bg-rose-950/30">
+                                    <i class="fa-solid fa-heart text-rose-500 text-2xl animate-pulse"></i>
+                                    <span class="text-[9px] text-rose-300 font-bold mt-1">TOUR</span>
+                                </div>
+                            `;
+                        } else if ((r >= 3 && r <= 4) && (c >= 3 && c <= 4)) {
+                            // Atla
+                        } else {
+                            grid.innerHTML += `<div class="glass rounded-lg border border-white/5 opacity-20 h-16"></div>`;
+                        }
+                    }
+                }
+            }
+
+            document.getElementById('p1Money').innerText = player1.money + ' ₺';
+            document.getElementById('p2Money').innerText = player2.money + ' ₺';
+            
+            checkGameConditions();
+        }
+
+        function checkGameConditions() {
+            if (player1.money < 0) {
+                triggerGameOver(player2, player1, "iflas etti!");
+                return;
+            } else if (player2.money < 0) {
+                triggerGameOver(player1, player2, "iflas etti!");
+                return;
+            }
+        }
+
+        function triggerGameOver(winner, looser, reason) {
+            document.getElementById('winnerTitle').innerText = `${winner.name} Kazandı!`;
+            document.getElementById('winnerDesc').innerText = `${looser.name} ${reason} 🎉 Mutlak hakim ilan edildiniz!`;
+            document.getElementById('gameOverModal').classList.remove('hidden');
+        }
+
+        // ZAR ATMA VE BUSINESS TOUR EKRAN ORTASI ANİMASYONU
+        function rollDice() {
+            if (isAnimating) return;
+            let p = (turn === 1 ? player1 : player2);
+            
+            if (p.jailTurns > 0) {
+                p.jailTurns--;
+                document.getElementById('statusText').innerText = `${p.name} kısıtta / ev izninde bekliyor! Kalan tur: ${p.jailTurns + 1}`;
+                switchTurn();
+                renderBoard();
+                return;
+            }
+
+            if (p.skipNextTurn) {
+                p.skipNextTurn = false;
+                document.getElementById('statusText').innerText = `${p.name} seyahat noktasında turunu geçirdi! Şimdi hareket edebilir.`;
+                switchTurn();
+                renderBoard();
+                return;
+            }
+
+            isAnimating = true;
+            document.getElementById('rollBtn').disabled = true;
+
+            const diceModal = document.getElementById('diceModal');
+            const mDice1 = document.getElementById('modalDice1');
+            const mDice2 = document.getElementById('modalDice2');
+            const mResult = document.getElementById('modalDiceResult');
+            
+            mDice1.classList.add('big-rolling');
+            mDice2.classList.add('big-rolling');
+            mResult.innerText = "Zarlar dönüyor...";
+            diceModal.classList.remove('hidden');
+
+            setTimeout(() => {
+                mDice1.classList.remove('big-rolling');
+                mDice2.classList.remove('big-rolling');
+
+                const dice1 = Math.floor(Math.random() * 6) + 1;
+                const dice2 = Math.floor(Math.random() * 6) + 1;
+                const totalRoll = dice1 + dice2;
+                const isDouble = (dice1 === dice2);
+
+                const diceSymbols = ['', '⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
+                mDice1.innerText = diceSymbols[dice1];
+                mDice2.innerText = diceSymbols[dice2];
+                mResult.innerText = `Toplam: ${totalRoll} ${isDouble ? ' - ÇİFT ZAR!' : ''}`;
+
+                setTimeout(() => {
+                    diceModal.classList.add('hidden');
+
+                    if (isDouble) {
+                        p.consecutiveDoubles++;
+                        if (p.consecutiveDoubles >= 3) {
+                            p.consecutiveDoubles = 0;
+                            p.pos = 7; // Hapishane
+                            p.jailTurns = 1;
+                            document.getElementById('statusText').innerText = `Üst üste 3 kez çift (${dice1}-${dice2}) attın! Yakalandın ve hapse gönderildin!`;
+                            isAnimating = false;
+                            document.getElementById('rollBtn').disabled = false;
+                            switchTurn();
+                            renderBoard();
+                            return;
+                        }
+                    } else {
+                        p.consecutiveDoubles = 0;
+                    }
+
+                    let stepsLeft = totalRoll;
+                    let hopInterval = setInterval(() => {
+                        p.pos = (p.pos + 1) % board.length;
+                        if (p.pos === 0) {
+                            p.money += 300;
+                        }
+                        renderBoard();
+                        stepsLeft--;
+
+                        if (stepsLeft <= 0) {
+                            clearInterval(hopInterval);
+                            isAnimating = false;
+                            document.getElementById('rollBtn').disabled = false;
+
+                            const cell = board[p.pos];
+                            document.getElementById('statusText').innerText = `${p.name} zarları attı: [${dice1}] - [${dice2}] (Toplam: ${totalRoll})${isDouble ? ' ÇİFT ZAR! Tekrar atabilirsin!' : ''} -> "${cell.name}" karesine geldi!`;
+
+                            handleCellAction(p, cell, isDouble);
+                        }
+                    }, 250);
+
+                }, 900);
+
+            }, 600);
+        }
+
+        function handleCellAction(p, cell, isDouble) {
+            pendingProperty = null;
+            document.getElementById('buyBtn').classList.add('hidden');
+
+            if (cell.type === "property") {
+                if (cell.owner === null) {
+                    if (p.money >= cell.price) {
+                        pendingProperty = { cell: cell, cost: cell.price };
+                        document.getElementById('buyCost').innerText = cell.price;
+                        document.getElementById('buyBtn').classList.remove('hidden');
+                        document.getElementById('statusText').innerText += ` | ${p.name}, ${cell.name} mülkünü satın alabilirsin!`;
+                    } else {
+                        document.getElementById('statusText').innerText += ` | ${p.name}, bu mülkü almak için yeterli paran yok!`;
+                    }
+                } else if (cell.owner !== turn) {
+                    let ownerObj = cell.owner === 1 ? player1 : player2;
+                    p.money -= cell.rent;
+                    ownerObj.money += cell.rent;
+                    
+                    // Rakibin mülkünü çalma maliyeti %50 zamlıdır
+                    let stealCost = Math.round(cell.price * 1.5);
+
+                    if (p.money >= stealCost) {
+                        pendingProperty = { cell: cell, cost: stealCost };
+                        document.getElementById('buyCost').innerText = stealCost;
+                        document.getElementById('buyBtn').classList.remove('hidden');
+                        document.getElementById('statusText').innerText += ` | ${ownerObj.name}'ye ${cell.rent}₺ kira ödedin. İstersen zamlı ${stealCost}₺ verip bu mülkü kapabilirsin!`;
+                    } else {
+                        document.getElementById('statusText').innerText += ` | ${ownerObj.name}'ye ${cell.rent}₺ kira ödedin! (Çalmak için paran yetersiz)`;
+                    }
+                    renderBoard();
+                } else {
+                    document.getElementById('statusText').innerText += ` | Kendi mülkündesin kiral, keyfine bak!`;
+                }
+
+                setTimeout(() => {
+                    document.getElementById('modalPlayer').innerText = `${p.name} Özel Konumda!`;
+                    document.getElementById('modalTitle').innerText = cell.name;
+                    document.getElementById('modalDesc').innerText = cell.desc;
+                    document.getElementById('memoryModal').classList.remove('hidden');
+                }, 300);
+
+            } else if (cell.type === "jail") {
+                p.jailTurns = 1;
+            } else if (cell.type === "goto-jail") {
+                p.pos = 7;
+                p.jailTurns = 1;
+                renderBoard();
+            } else if (cell.type === "festival") {
+                openFestivalModal(p);
+            } else if (cell.type === "travel") {
+                p.skipNextTurn = true;
+                openTravelModal(p);
+            } else if (cell.type === "chance") {
+                const card = chanceCards[Math.floor(Math.random() * chanceCards.length)];
+                p.money += card.money;
+                setTimeout(() => {
+                    document.getElementById('modalPlayer').innerText = `${p.name} Sürpriz Kutu Çekti!`;
+                    document.getElementById('modalTitle').innerText = card.title;
+                    document.getElementById('modalDesc').innerText = card.desc + ` (${card.money > 0 ? '+' + card.money : card.money}₺)`;
+                    document.getElementById('memoryModal').classList.remove('hidden');
+                }, 300);
+                renderBoard();
+            }
+
+            if (!isDouble) {
+                switchTurn();
+            } else {
+                document.getElementById('statusText').innerText += ` Çift attığın için sıra sende kaldı!`;
+            }
+        }
+
+        function openFestivalModal(p) {
+            const container = document.getElementById('festivalOptions');
+            container.innerHTML = '';
+            board.forEach((b, idx) => {
+                if (b.type === 'property') {
+                    container.innerHTML += `
+                        <button onclick="applyFestival(${idx})" class="p-2 bg-gray-900 hover:bg-rose-900/50 border border-rose-500/30 rounded-xl text-left text-xs text-rose-200 transition">
+                            🔥 ${b.name} (${b.rent}₺)
+                        </button>
+                    `;
+                }
+            });
+            document.getElementById('festivalModal').classList.remove('hidden');
+        }
+
+        function applyFestival(index) {
+            board.forEach(b => {
+                if (b.type === 'property') b.rent = b.baseRent;
+            });
+
+            let targetProp = board[index];
+            if (activeFestivalPropId === targetProp.id) {
+                targetProp.rent = targetProp.baseRent * 10;
+            } else {
+                targetProp.rent = targetProp.baseRent * 5;
+                activeFestivalPropId = targetProp.id;
+            }
+
+            document.getElementById('festivalModal').classList.add('hidden');
+            document.getElementById('statusText').innerText = `Festival uygulandı! "${targetProp.name}" mülkünün kirası katlandı!`;
+            renderBoard();
+        }
+
+        function openTravelModal(p) {
+            const container = document.getElementById('travelOptions');
+            container.innerHTML = '';
+            board.forEach((b, idx) => {
+                if (b.type === 'property') {
+                    container.innerHTML += `
+                        <button onclick="travelTo(${idx})" class="p-2 bg-gray-900 hover:bg-rose-900/50 border border-rose-500/30 rounded-xl text-left text-xs text-rose-200 transition">
+                            📍 ${b.name}
+                        </button>
+                    `;
+                }
+            });
+            document.getElementById('travelModal').classList.add('hidden');
+        }
+
+        function travelTo(index) {
+            let p = (turn === 1 ? player1 : player2);
+            p.pos = index;
+            document.getElementById('travelModal').classList.add('hidden');
+            document.getElementById('statusText').innerText = `${p.name} seyahat etti ve "${board[index].name}" karesine uçtu!`;
+            renderBoard();
+        }
+
+        function buyProperty() {
+            if (!pendingProperty) return;
+            let p = (turn === 1 ? player1 : player2);
+            
+            if (p.money >= pendingProperty.cost) {
+                p.money -= pendingProperty.cost;
+                pendingProperty.cell.owner = turn;
+                document.getElementById('buyBtn').classList.add('hidden');
+                document.getElementById('statusText').innerText = `${p.name} başarıyla ${pendingProperty.cell.name} mülkünü satın aldı / kaptı! (${pendingProperty.cost}₺)`;
+                renderBoard();
+            }
+        }
+
+        function switchTurn() {
+            turn = turn === 1 ? 2 : 1;
+            const indicator = document.getElementById('turnIndicator');
+            if (turn === 1) {
+                indicator.innerText = "Emre'nin Sırası 👦🏻";
+                indicator.className = "text-[11px] font-bold uppercase px-3 py-0.5 rounded-full bg-blue-600 text-white inline-block mb-0.5 shadow";
+            } else {
+                indicator.innerText = "Dilara'nın Sırası 👧🏻";
+                indicator.className = "text-[11px] font-bold uppercase px-3 py-0.5 rounded-full bg-pink-600 text-white inline-block mb-0.5 shadow";
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('memoryModal').classList.add('hidden');
+        }
+
+        renderBoard();
+    </script>
+</body>
+</html>
